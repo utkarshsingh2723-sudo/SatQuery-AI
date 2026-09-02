@@ -1,8 +1,4 @@
 <p align="center">
-  <img src="assets/banner.svg" alt="SatQuery AI banner" width="100%">
-</p>
-
-<p align="center">
   <img src="https://img.shields.io/badge/SIH-2026-14b8a6?style=flat-square" alt="SIH 2026">
   <img src="https://img.shields.io/badge/Problem%20Statement-26167-818cf8?style=flat-square" alt="Problem Statement 26167">
   <img src="https://img.shields.io/badge/status-in%20development-eab308?style=flat-square" alt="Status">
@@ -35,21 +31,7 @@ Satellite images are hard to read without training — SatQuery AI lets anyone a
 
 ## 🏗️ Architecture
 
-<p align="center">
-  <img src="assets/architecture.svg" alt="SatQuery AI system architecture diagram" width="85%">
-</p>
-
 A router agent (vision-language model) reads the query and image(s), decides which specialist tool applies, and hands off the pixel-level work to classical CV/GDAL rather than asking the model to do math it isn't built for. The router then formats the tool's output into a natural-language answer.
-
----
-
-## 🖥️ Interface Preview
-
-<p align="center">
-  <img src="assets/gui-mockup.svg" alt="SatQuery AI interface concept preview" width="90%">
-</p>
-
-<p align="center"><i>Concept preview — replace with real screenshots once the GUI is built.</i></p>
 
 ---
 

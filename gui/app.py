@@ -166,6 +166,54 @@ footer { visibility: hidden; }
     margin: 0;
 }
 
+/* ── Mobile responsiveness & touch optimization ── */
+@media (max-width: 768px) {
+    .hero-header h1 {
+        font-size: 1.8rem !important;
+    }
+    .hero-header p {
+        font-size: 0.9rem !important;
+    }
+    .glass-card {
+        padding: 0.85rem !important;
+        margin-bottom: 0.75rem !important;
+        border-radius: 12px !important;
+    }
+    .answer-box {
+        padding: 1rem !important;
+        border-radius: 12px !important;
+    }
+    .answer-box p {
+        font-size: 0.95rem !important;
+    }
+    /* Touch friendly buttons */
+    .stButton button {
+        min-height: 44px !important;
+        font-size: 0.9rem !important;
+        border-radius: 10px !important;
+    }
+    /* Stack columns on mobile */
+    div[data-testid="stHorizontalBlock"] {
+        flex-wrap: wrap !important;
+    }
+}
+
+/* ── Modern Touch-Friendly File Uploader ── */
+div[data-testid="stFileUploader"] {
+    background: rgba(108, 99, 255, 0.05);
+    border: 1.5px dashed rgba(108, 99, 255, 0.35);
+    border-radius: 14px;
+    padding: 0.75rem;
+    transition: all 0.2s ease-in-out;
+}
+div[data-testid="stFileUploader"]:hover {
+    border-color: rgba(167, 139, 250, 0.7);
+    background: rgba(108, 99, 255, 0.1);
+}
+div[data-testid="stFileUploader"] section {
+    padding: 0.5rem 0.25rem !important;
+}
+
 /* ── Sidebar styling ── */
 section[data-testid="stSidebar"] {
     background: linear-gradient(180deg, #151B28 0%, #1A1230 100%);
@@ -175,6 +223,8 @@ section[data-testid="stSidebar"] {
 /* ── Smooth image corners ── */
 img {
     border-radius: 10px;
+    max-width: 100%;
+    height: auto;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -653,15 +703,68 @@ elif not submit:
     # ── Welcome state ───────────────────────────────────────────────────
     if not images_loaded:
         st.markdown("""
-        <div style="text-align:center; padding:3rem 0; color:#6B7280;">
-            <div style="font-size:4rem; margin-bottom:1rem; opacity:0.5;">🛰️</div>
-            <h3 style="color:#9CA3AF; font-weight:500; margin-bottom:0.5rem;">Upload an image to get started</h3>
-            <p style="max-width:500px; margin:0 auto; line-height:1.6;">
-                Select your analysis mode in the sidebar, upload satellite imagery,
-                and ask questions about what you see.
+        <div style="text-align:center; padding:1.5rem 0 1rem; color:#6B7280;">
+            <div style="font-size:3.5rem; margin-bottom:0.5rem; opacity:0.8;">🛰️</div>
+            <h3 style="color:#A78BFA; font-weight:600; margin-bottom:0.3rem;">Upload Satellite Image to Begin</h3>
+            <p style="max-width:500px; margin:0 auto; line-height:1.5; font-size:0.9rem;">
+                Tap below or use the sidebar menu to upload GeoTIFF / PNG / JPG satellite images.
             </p>
         </div>
         """, unsafe_allow_html=True)
+
+        # Direct mobile upload box on main page
+        with st.container():
+            st.markdown('<div class="glass-card">', unsafe_allow_html=True)
+            st.markdown("##### 📂 Quick Upload (Mobile & Desktop)")
+            
+            if input_mode == IMAGE_MODE_SINGLE:
+                main_uploaded = st.file_uploader(
+                    "Tap to select image from camera / gallery / files",
+                    type=["tif", "tiff", "png", "jpg", "jpeg", "bmp", "webp"],
+                    key="upload_single_main",
+                )
+                if main_uploaded is not None:
+                    try:
+                        pil_m, path_m = _load_uploaded_image(main_uploaded)
+                        images_loaded.append(pil_m)
+                        image_paths.append(path_m)
+                        st.rerun()
+                    except Exception as e:
+                        st.error(f"Error loading uploaded file: {e}")
+
+            elif input_mode == IMAGE_MODE_BITEMPORAL:
+                col_m1, col_m2 = st.columns(2)
+                with col_m1:
+                    m_up1 = st.file_uploader("Upload Before (T1)", type=["tif", "tiff", "png", "jpg", "jpeg", "bmp", "webp"], key="upload_b1_main")
+                with col_m2:
+                    m_up2 = st.file_uploader("Upload After (T2)", type=["tif", "tiff", "png", "jpg", "jpeg", "bmp", "webp"], key="upload_b2_main")
+                if m_up1 and m_up2:
+                    try:
+                        p1, path1 = _load_uploaded_image(m_up1)
+                        p2, path2 = _load_uploaded_image(m_up2)
+                        images_loaded.extend([p1, p2])
+                        image_paths.extend([path1, path2])
+                        st.rerun()
+                    except Exception as e:
+                        st.error(f"Error: {e}")
+
+            else:
+                col_m1, col_m2 = st.columns(2)
+                with col_m1:
+                    m_up1 = st.file_uploader("Upload Optical", type=["tif", "tiff", "png", "jpg", "jpeg", "bmp", "webp"], key="upload_o_main")
+                with col_m2:
+                    m_up2 = st.file_uploader("Upload SAR", type=["tif", "tiff", "png", "jpg", "jpeg", "bmp", "webp"], key="upload_s_main")
+                if m_up1 and m_up2:
+                    try:
+                        p1, path1 = _load_uploaded_image(m_up1)
+                        p2, path2 = _load_uploaded_image(m_up2)
+                        images_loaded.extend([p1, p2])
+                        image_paths.extend([path1, path2])
+                        st.rerun()
+                    except Exception as e:
+                        st.error(f"Error: {e}")
+
+            st.markdown('</div>', unsafe_allow_html=True)
 
         # Feature cards
         st.markdown("<br>", unsafe_allow_html=True)
@@ -677,10 +780,10 @@ elif not submit:
         for col, (icon, title, desc) in zip([fc1, fc2, fc3, fc4], features):
             with col:
                 st.markdown(f"""
-                <div class="glass-card" style="text-align:center; min-height:180px;">
-                    <div style="font-size:2rem; margin-bottom:0.5rem;">{icon}</div>
-                    <div style="font-weight:600; color:#E5E7EB; margin-bottom:0.4rem;">{title}</div>
-                    <div style="font-size:0.82rem; color:#9CA3AF; line-height:1.5;">{desc}</div>
+                <div class="glass-card" style="text-align:center; min-height:160px;">
+                    <div style="font-size:1.8rem; margin-bottom:0.4rem;">{icon}</div>
+                    <div style="font-weight:600; color:#E5E7EB; margin-bottom:0.3rem; font-size:0.9rem;">{title}</div>
+                    <div style="font-size:0.8rem; color:#9CA3AF; line-height:1.4;">{desc}</div>
                 </div>
                 """, unsafe_allow_html=True)
 

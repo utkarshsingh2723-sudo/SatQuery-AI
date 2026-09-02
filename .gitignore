@@ -1,0 +1,25 @@
+# Python bytecode & cache
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# Virtual environments
+venv/
+.venv/
+env/
+ENV/
+
+# Streamlit config / cache
+.streamlit/secrets.toml
+
+# Data directory outputs & logs (keep sample files)
+data/benchmark_results/
+data/vqa_eval_results/
+data/change_test_output/
+*.log
+
+# Temp files
+*.tmp
+temp/
+scratch/
